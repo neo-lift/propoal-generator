@@ -4,7 +4,7 @@ import { generateProposalDraft } from '@/lib/ai/proposal-generator';
 import { buildProposalesPayload } from '@/lib/prompt/builder';
 import { createProposal } from '@/lib/proposales/client';
 import { logGeneratedProposal } from '@/lib/db';
-import type { ProposalPayload, ProposalResponse } from '@/lib/prompt/types';
+import type { ProposalResponse } from '@/lib/prompt/types';
 import { mockAvailableProducts } from '@/data/products';
 
 // Request validation schema

@@ -1,5 +1,4 @@
 import type { ProposalPayload, ProposalResponse } from "@/lib/prompt/types";
-import { env } from "process";
 
 export async function createProposal(
   payload: ProposalPayload,
