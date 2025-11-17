@@ -1,4 +1,4 @@
-import { buildPrompt, buildProposalesPayload } from '@/lib/domain/builder';
+import { buildPrompt, buildProposalesPayload } from '@/lib/prompt/builder';
 import type {
   CustomerInput,
   EventDetails,
@@ -6,7 +6,7 @@ import type {
   AIProposalDraft,
   AvailableProducts,
   NewRecipient,
-} from '@/lib/domain/types';
+} from '@/lib/prompt/types';
 
 describe('buildPrompt', () => {
   const mockCustomerInput: CustomerInput = {
@@ -39,16 +39,13 @@ describe('buildPrompt', () => {
 
   it('should build a structured prompt for the LLM', () => {
     const requestedServices = ['meeting', 'catering'];
-    const productsList = mockAvailableProducts.contentItems.map(
-      (item) => `content_id: ${item.id}`
-    );
 
     const prompt = buildPrompt({
       customer: mockCustomerInput,
       event: mockEventDetails,
       preferences: mockPreferences,
       requestedServices,
-      productsList,
+      products: mockAvailableProducts,
     });
 
     expect(prompt).toContain('John Smith');
@@ -57,7 +54,10 @@ describe('buildPrompt', () => {
     expect(prompt).toContain('50');
     expect(prompt).toContain('professional');
     expect(prompt).toContain('AV equipment');
-    expect(prompt).toMatch(/content_id.*101.*102.*103.*104/);
+    expect(prompt).toContain('content_id: 101');
+    expect(prompt).toContain('content_id: 102');
+    expect(prompt).toContain('content_id: 103');
+    expect(prompt).toContain('content_id: 104');
   });
 
   it('should handle minimal input', () => {
@@ -67,16 +67,13 @@ describe('buildPrompt', () => {
     };
 
     const requestedServices: string[] = [];
-    const productsList = mockAvailableProducts.contentItems.map(
-      (item) => `content_id: ${item.id}`
-    );
 
     const prompt = buildPrompt({
       customer: mockCustomerInput,
       event: mockEventDetails,
       preferences: minimalPreferences,
       requestedServices,
-      productsList,
+      products: mockAvailableProducts,
     });
 
     expect(prompt).toContain('casual');
@@ -86,16 +83,13 @@ describe('buildPrompt', () => {
 
   it('should include JSON output format instructions', () => {
     const requestedServices = ['meeting'];
-    const productsList = mockAvailableProducts.contentItems.map(
-      (item) => `content_id: ${item.id}`
-    );
 
     const prompt = buildPrompt({
       customer: mockCustomerInput,
       event: mockEventDetails,
       preferences: mockPreferences,
       requestedServices,
-      productsList,
+      products: mockAvailableProducts,
     });
 
     expect(prompt).toContain('title_md');

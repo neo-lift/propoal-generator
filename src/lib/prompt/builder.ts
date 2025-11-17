@@ -2,29 +2,22 @@ import type {
   CustomerInput,
   EventDetails,
   Preferences,
-  ProposalResponse,
   ProposalPayload,
   AIProposalDraft,
   NewRecipient,
+  AvailableProducts,
 } from "./types";
-
-export function generateProposal(payload: ProposalPayload): ProposalResponse {
-  return {
-    uuid: "123",
-    url: "https://www.example.com",
-  };
-}
 
 interface BuildPromptParams {
   customer: CustomerInput;
   event: EventDetails;
   preferences: Preferences;
   requestedServices: string[];
-  productsList: string[];
+  products: AvailableProducts;
 }
 
 export function buildPrompt(
-  { customer, event, preferences, requestedServices, productsList }: BuildPromptParams
+  { customer, event, preferences, requestedServices, products }: BuildPromptParams
 ): string {
   const prompt = `Generate a hotel proposal for the following event:
 
@@ -45,7 +38,7 @@ PREFERENCES:
 ${preferences.additionalBrief ? `- Additional Requirements: ${preferences.additionalBrief}` : ""}
 
 AVAILABLE CONTENT ITEMS (use these content_ids in your blocks):
-${productsList.join(", ")}
+${products.contentItems.map(item => `- content_id: ${item.id}`).join("\n")}
 
 Please generate a proposal in JSON format with the following structure:
 {

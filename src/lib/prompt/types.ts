@@ -44,8 +44,8 @@ export type VideoBlock = {
 export type Block = ContentBlock | VideoBlock;
 
 export type ProposalAttachment = {
-  mime_type: string;
-  name: string;
+  mime_type?: string;
+  name?: string;
   url: string;
 };
 
@@ -83,12 +83,20 @@ export interface Preferences {
   additionalBrief: string;
 }
 
+export interface AvailableProducts {
+  contentItems: Array<{
+    id: number;
+    name: string;
+    category: string;
+  }>;
+}
+
 export interface ProposalRequest {
   customer: CustomerInput;
   event: EventDetails;
   preferences: Preferences;
   requestedServices: string[];
-  productsList: string[];
+  productsList: AvailableProducts[];
 }
 
 export interface ProposalResponse {
@@ -97,17 +105,9 @@ export interface ProposalResponse {
 }
 
 export interface AIProposalDraft {
-  title_md: string;
-  description_md: string;
+  title_md?: string;
+  description_md?: string;
   data?: Record<string, unknown>;
   blocks?: ContentBlock[];
-  attachments?: Array<{ url: string; mime_type?: string; name?: string }>;
-}
-
-export interface AvailableProducts {
-  contentItems: Array<{
-    id: number;
-    name: string;
-    category: string;
-  }>;
+  attachments?: ProposalAttachment[];
 }
