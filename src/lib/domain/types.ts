@@ -95,3 +95,19 @@ export interface ProposalResponse {
   uuid: string;
   url: string;
 }
+
+export interface AIProposalDraft {
+  title_md: string;
+  description_md: string;
+  data?: Record<string, unknown>;
+  blocks?: ContentBlock[];
+  attachments?: Array<{ url: string; mime_type?: string; name?: string }>;
+}
+
+export interface AvailableProducts {
+  contentItems: Array<{
+    id: number;
+    name: string;
+    category: string;
+  }>;
+}

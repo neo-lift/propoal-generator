@@ -4,6 +4,8 @@ import type {
   Preferences,
   ProposalResponse,
   ProposalPayload,
+  AIProposalDraft,
+  NewRecipient,
 } from "./types";
 
 export function generateProposal(payload: ProposalPayload): ProposalResponse {
@@ -69,4 +71,54 @@ Requirements:
 - Calculate nights based on the start and end dates`;
 
   return prompt;
+}
+
+interface BuildProposalesPayloadParams {
+  input: {
+    customer: CustomerInput;
+    event: EventDetails;
+  };
+  aiDraft: AIProposalDraft;
+  env: {
+    companyId: number;
+    language: string;
+  };
+}
+
+export function buildProposalesPayload({
+  input,
+  aiDraft,
+  env,
+}: BuildProposalesPayloadParams): ProposalPayload {
+  // Parse customer name into first and last name
+  const nameParts = input.customer.customerName.trim().split(/\s+/);
+  const firstName = nameParts[0] || '';
+  const lastName = nameParts.slice(1).join(' ') || '';
+
+  const recipient: NewRecipient = {
+    first_name: firstName,
+    last_name: lastName,
+    email: input.customer.customerEmail,
+    company_name: input.customer.companyName,
+  };
+
+  const payload: ProposalPayload = {
+    company_id: env.companyId,
+    language: env.language,
+    title_md: aiDraft.title_md,
+    description_md: aiDraft.description_md,
+    recipient,
+    data: aiDraft.data,
+    blocks: aiDraft.blocks,
+  };
+
+  if (aiDraft.attachments && aiDraft.attachments.length > 0) {
+    payload.attachments = aiDraft.attachments.map((att) => ({
+      url: att.url,
+      mime_type: att.mime_type || 'application/octet-stream',
+      name: att.name || 'attachment',
+    }));
+  }
+
+  return payload;
 }
