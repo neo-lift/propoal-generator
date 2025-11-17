@@ -16,10 +16,20 @@ const generateProposalRequestSchema = z.object({
   }),
   event: z.object({
     eventType: z.string().min(1, 'Event type is required'),
-    startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Start date must be YYYY-MM-DD format'),
-    endDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'End date must be YYYY-MM-DD format'),
-    guestCount: z.number().int().positive('Guest count must be a positive number'),
-    roomsNeeded: z.number().int().positive('Rooms needed must be a positive number'),
+    startDate: z
+      .string()
+      .regex(/^\d{4}-\d{2}-\d{2}$/, 'Start date must be YYYY-MM-DD format'),
+    endDate: z
+      .string()
+      .regex(/^\d{4}-\d{2}-\d{2}$/, 'End date must be YYYY-MM-DD format'),
+    guestCount: z
+      .number()
+      .int()
+      .positive('Guest count must be a positive number'),
+    roomsNeeded: z
+      .number()
+      .int()
+      .positive('Rooms needed must be a positive number'),
   }),
   preferences: z.object({
     meetingSpaces: z.boolean(),
@@ -38,14 +48,14 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     // Check required environment variables
     const companyId = process.env.PROPOSALES_COMPANY_ID;
     const apiKey = process.env.PROPOSALES_API_KEY;
-    
+
     if (!companyId || !apiKey) {
       return NextResponse.json(
-        { 
+        {
           error: 'Server configuration error',
-          message: 'Missing required environment variables for Proposales API'
+          message: 'Missing required environment variables for Proposales API',
         },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -83,16 +93,24 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const proposalResult = await createProposal(proposalesPayload);
 
     // Log the generated proposal to database
-    try {
-      await logGeneratedProposal({
-        customerEmail: validatedData.customer.customerEmail,
-        proposalUuid: proposalResult.uuid,
-        summary: aiDraft.title_md?.replace(/^#+ /, '').substring(0, 255) || 'No summary available', 
-        companyName: validatedData.customer.companyName,
-        eventType: validatedData.event.eventType,
-      });
-    } catch (dbError) {
-      console.error('Failed to log proposal to database:', dbError);
+    const logResult = await logGeneratedProposal({
+      customerEmail: validatedData.customer.customerEmail,
+      proposalUuid: proposalResult.uuid,
+      summary:
+        aiDraft.title_md?.replace(/^#+ /, '').substring(0, 255) ||
+        'No summary available',
+      companyName: validatedData.customer.companyName,
+      eventType: validatedData.event.eventType,
+    });
+
+    if (logResult === -1) {
+      return NextResponse.json(
+        {
+          error: 'Failed to log proposal to database',
+          message: 'Failed to log proposal to database',
+        },
+        { status: 500 },
+      );
     }
 
     const response: ProposalResponse = {
@@ -101,7 +119,6 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     };
 
     return NextResponse.json(response, { status: 201 });
-
   } catch (error) {
     console.error('Error generating proposal:', error);
 
@@ -115,7 +132,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
             message: err.message,
           })),
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -128,7 +145,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
             message: 'Failed to create proposal in Proposales',
             details: error.message,
           },
-          { status: 502 }
+          { status: 502 },
         );
       }
 
@@ -138,7 +155,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
             error: 'Network error',
             message: 'Failed to communicate with Proposales API',
           },
-          { status: 503 }
+          { status: 503 },
         );
       }
     }
@@ -149,7 +166,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         error: 'Internal server error',
         message: 'An unexpected error occurred while generating the proposal',
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

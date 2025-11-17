@@ -29,6 +29,32 @@ export default function ProposalGenerator() {
       return;
     }
 
+    // fetch proposal from API
+    try {
+      const response = await fetch('/api/generate-proposal', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          customer: {
+            customerName: 'John Doe',
+            customerEmail: 'john.doe@example.com',
+            companyName: 'Example Inc.',
+          },
+          event: { eventType: proposalType, startDate: '2024-06-01', endDate: '2024-06-03', guestCount: 100, roomsNeeded: 10 },
+          preferences: { meetingSpaces: true, catering: true, tone: 'professional', additionalBrief: inputText },
+        }),
+      });
+      const data = await response.json();
+      setResult(data.proposal);
+    } catch (error) {
+      setError('Failed to generate proposal');
+      setLoading(false);
+    } finally {
+      setLoading(false);
+    }
+
     console.log(inputText, proposalType);
     setError(null);
     setResult(null);

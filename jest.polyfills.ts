@@ -12,8 +12,9 @@ if (typeof globalThis.TransformStream === 'undefined') {
     const { TransformStream } = require('stream/web');
     globalThis.TransformStream = TransformStream;
     global.TransformStream = TransformStream;
-  } catch {
+  } catch (streamModuleError) {
     // Fallback: use web-streams-polyfill
+    console.warn('Falling back to web-streams-polyfill:', streamModuleError);
     const { TransformStream } = require('web-streams-polyfill/ponyfill/es2018');
     globalThis.TransformStream = TransformStream;
     global.TransformStream = TransformStream;

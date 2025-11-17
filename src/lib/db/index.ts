@@ -5,7 +5,10 @@ let prisma: PrismaClient | null = null;
 export function getPrismaClient(): PrismaClient {
   if (!prisma) {
     prisma = new PrismaClient({
-      log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
+      log:
+        process.env.NODE_ENV === 'development'
+          ? ['query', 'error', 'warn']
+          : ['error'],
     });
   }
   return prisma;
@@ -21,10 +24,10 @@ export interface ProposalLogData {
 
 export async function logGeneratedProposal(
   data: ProposalLogData,
-  customPrisma?: PrismaClient
+  customPrisma?: PrismaClient,
 ): Promise<number> {
   const client = customPrisma || getPrismaClient();
-  
+
   try {
     const result = await client.proposalLog.create({
       data: {
@@ -38,33 +41,35 @@ export async function logGeneratedProposal(
         id: true,
       },
     });
-    
+
     return result.id;
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error';
     console.error('Failed to log proposal:', error);
-    
+
     // In production, we might want to fail gracefully instead of throwing
     if (process.env.NODE_ENV === 'production') {
       console.error('Database logging failed, continuing without logging');
       return -1; // Indicate logging failed but don't break the flow
     }
-    
+
     throw new Error(`Failed to log proposal: ${message}`);
   }
 }
 
-export async function getRecentProposals(limit: number = 10): Promise<Array<{
-  id: number;
-  createdAt: Date;
-  customerEmail: string;
-  proposalUuid: string;
-  summary: string;
-  companyName?: string;
-  eventType?: string;
-}>> {
+export async function getRecentProposals(limit: number = 10): Promise<
+  Array<{
+    id: number;
+    createdAt: Date;
+    customerEmail: string;
+    proposalUuid: string;
+    summary: string;
+    companyName?: string;
+    eventType?: string;
+  }>
+> {
   const client = getPrismaClient();
-  
+
   try {
     const proposals = await client.proposalLog.findMany({
       orderBy: {
@@ -81,7 +86,7 @@ export async function getRecentProposals(limit: number = 10): Promise<Array<{
         eventType: true,
       },
     });
-    
+
     // Convert null to undefined for consistent typing
     return proposals.map(proposal => ({
       ...proposal,
@@ -94,16 +99,18 @@ export async function getRecentProposals(limit: number = 10): Promise<Array<{
   }
 }
 
-export async function findProposalsByEmail(email: string): Promise<Array<{
-  id: number;
-  createdAt: Date;
-  proposalUuid: string;
-  summary: string;
-  companyName?: string;
-  eventType?: string;
-}>> {
+export async function findProposalsByEmail(email: string): Promise<
+  Array<{
+    id: number;
+    createdAt: Date;
+    proposalUuid: string;
+    summary: string;
+    companyName?: string;
+    eventType?: string;
+  }>
+> {
   const client = getPrismaClient();
-  
+
   try {
     const proposals = await client.proposalLog.findMany({
       where: {
@@ -121,7 +128,7 @@ export async function findProposalsByEmail(email: string): Promise<Array<{
         eventType: true,
       },
     });
-    
+
     // Convert null to undefined for consistent typing
     return proposals.map(proposal => ({
       ...proposal,
