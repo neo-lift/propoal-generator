@@ -80,7 +80,7 @@ export interface EventDetails {
 
 export interface Preferences {
   tone: string;
-  additionalBrief: string;
+  additionalBrief?: string;
 }
 
 export interface AvailableProducts {
