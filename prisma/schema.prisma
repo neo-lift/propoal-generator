@@ -1,0 +1,30 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model ProposalLog {
+  id            Int      @id @default(autoincrement())
+  createdAt     DateTime @default(now()) @map("created_at")
+  customerEmail String   @map("customer_email") @db.VarChar(255)
+  proposalUuid  String   @map("proposal_uuid") @db.VarChar(255)
+  summary       String   @db.Text
+  companyName   String?  @map("company_name") @db.VarChar(255)
+  eventType     String?  @map("event_type") @db.VarChar(255)
+
+  @@index([createdAt(sort: Desc)])
+  @@index([customerEmail])
+  @@index([proposalUuid])
+  @@map("proposal_logs")
+}
